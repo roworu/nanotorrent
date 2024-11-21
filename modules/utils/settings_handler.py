@@ -16,7 +16,10 @@ class SettingsHandler:
     def _create_default_settings(self):
         """Create default settings and save them to the file."""
         self.config["Downloads"] = {"download_path": ""}
-        self.config["UI"] = {"theme": "Light"}
+        self.config["Speed"] = {
+            "max_download_speed": "0",  # 0 means no limit
+            "max_upload_speed": "0",    # 0 means no limit
+        }
         self.save()
 
     def _load_settings(self):
@@ -27,21 +30,27 @@ class SettingsHandler:
             # Validate and add missing sections or options
             if "Downloads" not in self.config:
                 self.config["Downloads"] = {"download_path": ""}
-            if "UI" not in self.config:
-                self.config["UI"] = {"theme": "Light"}
+            if "Speed" not in self.config:
+                self.config["Speed"] = {
+                    "max_download_speed": "0",
+                    "max_upload_speed": "0",
+                }
+            else:
+                # Add missing keys to existing Speed section
+                if "max_download_speed" not in self.config["Speed"]:
+                    self.config["Speed"]["max_download_speed"] = "0"
+                if "max_upload_speed" not in self.config["Speed"]:
+                    self.config["Speed"]["max_upload_speed"] = "0"
+
             self.save()  # Save updated settings if any defaults were added
         except configparser.Error as e:
             print(f"Error loading configuration file: {e}")
             self._create_default_settings()
 
     def get(self, section, option):
-        """
-        Get a value from the settings file.
-        If the section or option is missing, return an empty string and add it to the file.
-        """
+        """Get a value from the settings file."""
         try:
-            value = self.config.get(section, option)
-            return value
+            return self.config.get(section, option)
         except (configparser.NoSectionError, configparser.NoOptionError):
             # Add missing section/option with default value
             self.set(section, option, "")
@@ -61,3 +70,4 @@ class SettingsHandler:
                 self.config.write(f)
         except OSError as e:
             print(f"Error saving configuration file: {e}")
+

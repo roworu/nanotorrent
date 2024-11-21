@@ -1,0 +1,2 @@
+libtorrent==2.0.9
+PyQt6==6.7.1
